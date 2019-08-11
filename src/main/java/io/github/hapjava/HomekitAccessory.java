@@ -55,6 +55,13 @@ public interface HomekitAccessory {
   String getManufacturer();
 
   /**
+   * Returns a firmware revision to display in iOS.
+   *
+   * @return the firmware revision, or null.
+   */
+  String getFirmwareRevision();
+
+  /**
    * The collection of Services this accessory supports. Services are the primary way to interact
    * with the accessory via Homekit. Besides the Services offered here, the accessory will
    * automatically include the required information service.

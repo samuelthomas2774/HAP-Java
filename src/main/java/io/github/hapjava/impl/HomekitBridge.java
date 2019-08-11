@@ -11,12 +11,14 @@ public class HomekitBridge implements Bridge {
   private final String serialNumber;
   private final String model;
   private final String manufacturer;
+  private final String firmwareRevision;
 
-  public HomekitBridge(String label, String serialNumber, String model, String manufacturer) {
+  public HomekitBridge(String label, String serialNumber, String model, String manufacturer, String firmwareRevision) {
     this.label = label;
     this.serialNumber = serialNumber;
     this.model = model;
     this.manufacturer = manufacturer;
+    this.firmwareRevision = firmwareRevision;
   }
 
   @Override
@@ -37,6 +39,11 @@ public class HomekitBridge implements Bridge {
   @Override
   public String getManufacturer() {
     return manufacturer;
+  }
+
+  @Override
+  public String getFirmwareRevision() {
+      return firmwareRevision;
   }
 
   @Override

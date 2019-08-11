@@ -110,10 +110,11 @@ public class HomekitServer {
       String label,
       String manufacturer,
       String model,
-      String serialNumber)
+      String serialNumber,
+      String firmwareRevision)
       throws IOException {
     HomekitRoot root = new HomekitRoot(label, http, localAddress, authInfo);
-    root.addAccessory(new HomekitBridge(label, serialNumber, model, manufacturer));
+    root.addAccessory(new HomekitBridge(label, serialNumber, model, manufacturer, firmwareRevision));
     return root;
   }
 

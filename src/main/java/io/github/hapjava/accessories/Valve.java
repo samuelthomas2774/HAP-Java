@@ -30,7 +30,7 @@ public interface Valve extends HomekitAccessory {
    *
    * @return a future that will contain the binary state
    */
-  CompletableFuture<Boolean> getValveActive();
+  CompletableFuture<Integer> getValveActive();
 
   /**
    * Sets the valve active state
@@ -39,7 +39,7 @@ public interface Valve extends HomekitAccessory {
    * @return a future that completes when the change is made
    * @throws Exception when the change cannot be made
    */
-  CompletableFuture<Void> setValveActive(boolean active) throws Exception;
+  CompletableFuture<Void> setValveActive(Integer active) throws Exception;
 
   /**
    * Subscribes to changes in the active state of the valve.

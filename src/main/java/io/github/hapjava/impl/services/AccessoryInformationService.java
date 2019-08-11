@@ -5,6 +5,7 @@ import io.github.hapjava.impl.characteristics.information.Identify;
 import io.github.hapjava.impl.characteristics.information.Manufacturer;
 import io.github.hapjava.impl.characteristics.information.Model;
 import io.github.hapjava.impl.characteristics.information.SerialNumber;
+import io.github.hapjava.impl.characteristics.information.FirmwareRevision;
 
 public class AccessoryInformationService extends AbstractServiceImpl {
 
@@ -18,6 +19,7 @@ public class AccessoryInformationService extends AbstractServiceImpl {
     addCharacteristic(new Manufacturer(accessory));
     addCharacteristic(new Model(accessory));
     addCharacteristic(new SerialNumber(accessory));
+    addCharacteristic(new FirmwareRevision(accessory));
     addCharacteristic(new Identify(accessory));
   }
 }
