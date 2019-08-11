@@ -1,6 +1,7 @@
 package io.github.hapjava;
 
 import io.github.hapjava.characteristics.Characteristic;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -35,4 +36,11 @@ public interface Service {
    *     ########-####-####-####-############.
    */
   String getType();
+
+  /**
+   * A list of linked services. These must also be returned by the accessory's getServices function.
+   */
+  default List<Service> getLinkedServices() {
+    return Collections.emptyList();
+  }
 }

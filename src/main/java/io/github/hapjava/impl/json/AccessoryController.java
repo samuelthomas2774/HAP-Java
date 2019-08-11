@@ -84,6 +84,18 @@ public class AccessoryController {
                   .map(future -> future.join())
                   .forEach(c -> jsonCharacteristics.add(c));
               builder.add("characteristics", jsonCharacteristics);
+
+              List<Service> linkedServices = service.getLinkedServices();
+
+              if (linkedServices.size() > 0) {
+                JsonArrayBuilder jsonLinkedServices = Json.createArrayBuilder();
+                for (Service linkedService: linkedServices) {
+                  int iid = registry.getIid(accessory, linkedService);
+                  jsonLinkedServices.add(iid);
+                }
+                builder.add("linked", jsonLinkedServices);
+              }
+
               return builder.build();
             });
   }
