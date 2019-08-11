@@ -55,6 +55,10 @@ public abstract class BaseCharacteristic<T> implements Characteristic {
     this.description = description;
   }
 
+  public String getType() {
+    return type;
+  }
+
   @Override
   /** {@inheritDoc} */
   public final CompletableFuture<JsonObject> toJson(int iid) {

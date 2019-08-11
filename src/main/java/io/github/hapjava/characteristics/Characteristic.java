@@ -18,6 +18,7 @@ import javax.json.JsonValue;
  * @author Andy Lintner
  */
 public interface Characteristic {
+  String getType();
 
   /**
    * Adds an attribute to the passed JsonObjectBuilder named "value" with the current value of the

@@ -9,6 +9,12 @@ import java.util.List;
  * @author Andy Lintner
  */
 public interface Service {
+  /**
+   * Returns a persistent identifier used to assign persistent IIDs.
+   */
+  default String getId() {
+    return getType();
+  }
 
   /**
    * Characteristics are the variables offered for reading, updating, and eventing by the Service

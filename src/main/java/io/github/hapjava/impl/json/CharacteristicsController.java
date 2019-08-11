@@ -10,7 +10,6 @@ import io.github.hapjava.impl.http.HttpResponse;
 import io.github.hapjava.impl.responses.NotFoundResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.Map;
 import javax.json.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,17 +41,11 @@ public class CharacteristicsController {
       int aid = Integer.parseInt(parts[0]);
       int iid = Integer.parseInt(parts[1]);
       JsonObjectBuilder characteristic = Json.createObjectBuilder();
-      Map<Integer, Characteristic> characteristicMap = registry.getCharacteristics(aid);
-      if (!characteristicMap.isEmpty()) {
-        Characteristic targetCharacteristic = characteristicMap.get(iid);
-        if (targetCharacteristic != null) {
-          targetCharacteristic.supplyValue(characteristic);
+      Characteristic targetCharacteristic = registry.getCharacteristic(aid, iid);
+      if (targetCharacteristic != null) {
+        targetCharacteristic.supplyValue(characteristic);
 
-          characteristics.add(characteristic.add("aid", aid).add("iid", iid).build());
-        } else {
-          logger.warn(
-              "Accessory " + aid + " does not have characteristic " + iid + "Request: " + uri);
-        }
+        characteristics.add(characteristic.add("aid", aid).add("iid", iid).build());
       } else {
         logger.warn(
             "Accessory " + aid + " has no characteristics or does not exist. Request: " + uri);
@@ -77,7 +70,7 @@ public class CharacteristicsController {
           JsonObject jsonCharacteristic = (JsonObject) value;
           int aid = jsonCharacteristic.getInt("aid");
           int iid = jsonCharacteristic.getInt("iid");
-          Characteristic characteristic = registry.getCharacteristics(aid).get(iid);
+          Characteristic characteristic = registry.getCharacteristic(aid, iid);
 
           if (jsonCharacteristic.containsKey("value")) {
             characteristic.setValue(jsonCharacteristic.get("value"));

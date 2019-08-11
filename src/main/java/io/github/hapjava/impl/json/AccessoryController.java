@@ -31,13 +31,11 @@ public class AccessoryController {
 
     Map<Integer, List<CompletableFuture<JsonObject>>> accessoryServiceFutures = new HashMap<>();
     for (HomekitAccessory accessory : registry.getAccessories()) {
-      int iid = 0;
       List<CompletableFuture<JsonObject>> serviceFutures = new ArrayList<>();
-      for (Service service : registry.getServices(accessory.getId())) {
-        serviceFutures.add(toJson(service, iid));
-        iid += service.getCharacteristics().size() + 1;
+      for (Service service : registry.getServices(registry.getAid(accessory))) {
+        serviceFutures.add(toJson(accessory, service));
       }
-      accessoryServiceFutures.put(accessory.getId(), serviceFutures);
+      accessoryServiceFutures.put(registry.getAid(accessory), serviceFutures);
     }
 
     Map<Integer, JsonArrayBuilder> serviceArrayBuilders = new HashMap<>();
@@ -53,8 +51,8 @@ public class AccessoryController {
     for (HomekitAccessory accessory : registry.getAccessories()) {
       accessories.add(
           Json.createObjectBuilder()
-              .add("aid", accessory.getId())
-              .add("services", serviceArrayBuilders.get(accessory.getId())));
+              .add("aid", registry.getAid(accessory))
+              .add("services", serviceArrayBuilders.get(registry.getAid(accessory))));
     }
 
     try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
@@ -64,16 +62,16 @@ public class AccessoryController {
     }
   }
 
-  private CompletableFuture<JsonObject> toJson(Service service, int interfaceId) throws Exception {
+  private CompletableFuture<JsonObject> toJson(HomekitAccessory accessory, Service service) throws Exception {
     String shortType =
         service.getType().replaceAll("^0*([0-9a-fA-F]+)-0000-1000-8000-0026BB765291$", "$1");
     JsonObjectBuilder builder =
-        Json.createObjectBuilder().add("iid", ++interfaceId).add("type", shortType);
-    List<Characteristic> characteristics = service.getCharacteristics();
+        Json.createObjectBuilder().add("iid", registry.getIid(accessory, service)).add("type", shortType);
+    List<Characteristic> characteristics = registry.getCharacteristics(service);
     Collection<CompletableFuture<JsonObject>> characteristicFutures =
         new ArrayList<>(characteristics.size());
     for (Characteristic characteristic : characteristics) {
-      characteristicFutures.add(characteristic.toJson(++interfaceId));
+      characteristicFutures.add(characteristic.toJson(registry.getIid(accessory, characteristic)));
     }
 
     return CompletableFuture.allOf(
