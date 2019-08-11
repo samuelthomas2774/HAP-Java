@@ -1,10 +1,10 @@
 package io.github.hapjava.impl.pairing;
 
+import io.github.hapjava.HomekitAdvertiser;
 import io.github.hapjava.HomekitAuthInfo;
 import io.github.hapjava.impl.HomekitRegistry;
 import io.github.hapjava.impl.http.HttpRequest;
 import io.github.hapjava.impl.http.HttpResponse;
-import io.github.hapjava.impl.jmdns.JmdnsHomekitAdvertiser;
 import io.github.hapjava.impl.responses.NotFoundResponse;
 import io.github.hapjava.impl.responses.UnauthorizedResponse;
 import org.slf4j.Logger;
@@ -16,12 +16,12 @@ public class PairingManager {
 
   private final HomekitAuthInfo authInfo;
   private final HomekitRegistry registry;
-  private final JmdnsHomekitAdvertiser advertiser;
+  private final HomekitAdvertiser advertiser;
 
   private SrpHandler srpHandler;
 
   public PairingManager(
-      HomekitAuthInfo authInfo, HomekitRegistry registry, JmdnsHomekitAdvertiser advertiser) {
+      HomekitAuthInfo authInfo, HomekitRegistry registry, HomekitAdvertiser advertiser) {
     this.authInfo = authInfo;
     this.registry = registry;
     this.advertiser = advertiser;

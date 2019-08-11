@@ -1,5 +1,6 @@
 package io.github.hapjava.impl.jmdns;
 
+import io.github.hapjava.HomekitAdvertiser;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -10,7 +11,7 @@ import javax.jmdns.ServiceInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JmdnsHomekitAdvertiser {
+public class JmdnsHomekitAdvertiser implements HomekitAdvertiser {
 
   private static final String SERVICE_TYPE = "_hap._tcp.local.";
 
@@ -23,9 +24,15 @@ public class JmdnsHomekitAdvertiser {
   private String mac;
   private int port;
   private int configurationIndex;
+  public int category = 1;
+
+  public JmdnsHomekitAdvertiser(InetAddress localAddress, int _category) throws UnknownHostException, IOException {
+    jmdns = JmDNS.create(localAddress);
+    category = _category;
+  }
 
   public JmdnsHomekitAdvertiser(InetAddress localAddress) throws UnknownHostException, IOException {
-    jmdns = JmDNS.create(localAddress);
+    this(localAddress, 1);
   }
 
   public synchronized void advertise(String label, String mac, int port, int configurationIndex)
@@ -54,6 +61,7 @@ public class JmdnsHomekitAdvertiser {
 
   public synchronized void stop() {
     jmdns.unregisterAllServices();
+    isAdvertising = false;
   }
 
   public synchronized void setDiscoverable(boolean discoverable) throws IOException {
@@ -87,7 +95,7 @@ public class JmdnsHomekitAdvertiser {
     props.put("c#", Integer.toString(configurationIndex));
     props.put("s#", "1");
     props.put("ff", "0");
-    props.put("ci", "1");
+    props.put("ci", Integer.toString(category));
     jmdns.registerService(ServiceInfo.create(SERVICE_TYPE, label, port, 1, 1, props));
   }
 }

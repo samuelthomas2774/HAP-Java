@@ -1,6 +1,7 @@
 package io.github.hapjava;
 
 import io.github.hapjava.impl.HomekitRegistry;
+import io.github.hapjava.impl.HomekitRegistryState;
 import io.github.hapjava.impl.HomekitWebHandler;
 import io.github.hapjava.impl.accessories.Bridge;
 import io.github.hapjava.impl.connections.HomekitClientConnectionFactoryImpl;
@@ -24,7 +25,7 @@ public class HomekitRoot {
 
   private static final Logger logger = LoggerFactory.getLogger(HomekitRoot.class);
 
-  private final JmdnsHomekitAdvertiser advertiser;
+  private final HomekitAdvertiser advertiser;
   private final HomekitWebHandler webHandler;
   private final HomekitAuthInfo authInfo;
   private final String label;
@@ -34,16 +35,22 @@ public class HomekitRoot {
   private int configurationIndex = 1;
 
   HomekitRoot(
-      String label, HomekitWebHandler webHandler, InetAddress localhost, HomekitAuthInfo authInfo)
+      String label, int category, HomekitWebHandler webHandler, InetAddress localhost, HomekitAuthInfo authInfo)
       throws IOException {
-    this(label, webHandler, authInfo, new JmdnsHomekitAdvertiser(localhost));
+    this(label, webHandler, authInfo, new JmdnsHomekitAdvertiser(localhost, category));
   }
+
+  HomekitRoot(
+    String label, HomekitWebHandler webHandler, InetAddress localhost, HomekitAuthInfo authInfo)
+    throws IOException {
+        this(label, 1, webHandler, localhost, authInfo);
+    }
 
   HomekitRoot(
       String label,
       HomekitWebHandler webHandler,
       HomekitAuthInfo authInfo,
-      JmdnsHomekitAdvertiser advertiser)
+      HomekitAdvertiser advertiser)
       throws IOException {
     this.advertiser = advertiser;
     this.webHandler = webHandler;
@@ -61,11 +68,15 @@ public class HomekitRoot {
    * @param accessory to advertise and handle.
    */
   public void addAccessory(HomekitAccessory accessory) {
+    addAccessory(accessory, null);
+  }
+
+  public void addAccessory(HomekitAccessory accessory, HomekitRegistryState registryState) {
     if (accessory.getId() <= 1 && !(accessory instanceof Bridge)) {
       throw new IndexOutOfBoundsException(
           "The ID of an accessory used in a bridge must be greater than 1");
     }
-    addAccessorySkipRangeCheck(accessory);
+    addAccessorySkipRangeCheck(accessory, registryState);
   }
 
   /**
@@ -74,11 +85,11 @@ public class HomekitRoot {
    *
    * @param accessory to advertise and handle.
    */
-  void addAccessorySkipRangeCheck(HomekitAccessory accessory) {
-    this.registry.add(accessory);
+  void addAccessorySkipRangeCheck(HomekitAccessory accessory, HomekitRegistryState registryState) {
+    this.registry.add(accessory, registryState);
     logger.info("Added accessory " + accessory.getLabel());
     if (started) {
-      registry.reset();
+      // registry.reset(registryState);
       webHandler.resetConnections();
     }
   }
@@ -94,7 +105,7 @@ public class HomekitRoot {
     this.registry.remove(accessory);
     logger.info("Removed accessory " + accessory.getLabel());
     if (started) {
-      registry.reset();
+      // registry.reset();
       webHandler.resetConnections();
     }
   }
@@ -107,7 +118,7 @@ public class HomekitRoot {
    */
   public void start() {
     started = true;
-    registry.reset();
+    // registry.reset();
     webHandler
         .start(
             new HomekitClientConnectionFactoryImpl(authInfo, registry, subscriptions, advertiser))
@@ -135,7 +146,7 @@ public class HomekitRoot {
    *
    * @throws IOException if there is an error in the underlying protocol, such as a TCP error
    */
-  public void refreshAuthInfo() throws IOException {
+  public void refreshAuthInfo() throws Exception {
     advertiser.setDiscoverable(!authInfo.hasUser());
   }
 
@@ -160,7 +171,7 @@ public class HomekitRoot {
    *     accessory information
    * @throws IOException if there is an error in the underlying protocol, such as a TCP error
    */
-  public void setConfigurationIndex(int revision) throws IOException {
+  public void setConfigurationIndex(int revision) throws Exception {
     if (revision < 1) {
       throw new IllegalArgumentException("revision must be greater than or equal to 1");
     }

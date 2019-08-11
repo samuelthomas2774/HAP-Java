@@ -1,12 +1,12 @@
 package io.github.hapjava.impl.connections;
 
 import io.github.hapjava.HomekitAccessory;
+import io.github.hapjava.HomekitAdvertiser;
 import io.github.hapjava.HomekitAuthInfo;
 import io.github.hapjava.impl.HomekitRegistry;
 import io.github.hapjava.impl.http.HomekitClientConnection;
 import io.github.hapjava.impl.http.HttpRequest;
 import io.github.hapjava.impl.http.HttpResponse;
-import io.github.hapjava.impl.jmdns.JmdnsHomekitAdvertiser;
 import io.github.hapjava.impl.json.AccessoryController;
 import io.github.hapjava.impl.json.CharacteristicsController;
 import io.github.hapjava.impl.pairing.PairVerificationManager;
@@ -30,7 +30,7 @@ class HttpSession {
   private final HomekitRegistry registry;
   private final SubscriptionManager subscriptions;
   private final HomekitClientConnection connection;
-  private final JmdnsHomekitAdvertiser advertiser;
+  private final HomekitAdvertiser advertiser;
 
   private static final Logger logger = LoggerFactory.getLogger(HttpSession.class);
 
@@ -39,7 +39,7 @@ class HttpSession {
       HomekitRegistry registry,
       SubscriptionManager subscriptions,
       HomekitClientConnection connection,
-      JmdnsHomekitAdvertiser advertiser) {
+      HomekitAdvertiser advertiser) {
     this.authInfo = authInfo;
     this.registry = registry;
     this.subscriptions = subscriptions;

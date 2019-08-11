@@ -8,7 +8,7 @@ import io.github.hapjava.HomekitAccessory;
 import io.github.hapjava.Service;
 import io.github.hapjava.characteristics.Characteristic;
 
-class HomekitRegistryState implements Serializable {
+public class HomekitRegistryState implements Serializable {
   private static final long serialVersionUID = 1L;
 
   // Maps aids to a ConcurrentMap mapping iids to Services and Characteristics

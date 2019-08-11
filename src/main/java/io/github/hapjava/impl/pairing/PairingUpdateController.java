@@ -1,5 +1,6 @@
 package io.github.hapjava.impl.pairing;
 
+import io.github.hapjava.HomekitAdvertiser;
 import io.github.hapjava.HomekitAuthInfo;
 import io.github.hapjava.impl.http.HttpRequest;
 import io.github.hapjava.impl.http.HttpResponse;
@@ -11,14 +12,14 @@ import java.nio.charset.StandardCharsets;
 public class PairingUpdateController {
 
   private final HomekitAuthInfo authInfo;
-  private final JmdnsHomekitAdvertiser advertiser;
+  private final HomekitAdvertiser advertiser;
 
-  public PairingUpdateController(HomekitAuthInfo authInfo, JmdnsHomekitAdvertiser advertiser) {
+  public PairingUpdateController(HomekitAuthInfo authInfo, HomekitAdvertiser advertiser) {
     this.authInfo = authInfo;
     this.advertiser = advertiser;
   }
 
-  public HttpResponse handle(HttpRequest request) throws IOException {
+  public HttpResponse handle(HttpRequest request) throws Exception {
     DecodeResult d = TypeLengthValueUtils.decode(request.getBody());
 
     int method = d.getByte(MessageType.METHOD);

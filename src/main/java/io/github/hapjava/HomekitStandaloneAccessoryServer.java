@@ -23,12 +23,26 @@ public class HomekitStandaloneAccessoryServer {
       InetAddress localhost,
       HomekitAuthInfo authInfo)
       throws UnknownHostException, IOException {
-    root = new HomekitRoot(accessory.getLabel(), webHandler, localhost, authInfo);
+        this(accessory, 1, webHandler, localhost, authInfo);
+    }
+
+  HomekitStandaloneAccessoryServer(
+      HomekitAccessory accessory,
+      int category,
+      HomekitWebHandler webHandler,
+      InetAddress localhost,
+      HomekitAuthInfo authInfo)
+      throws UnknownHostException, IOException {
+    root = new HomekitRoot(accessory.getLabel(), category, webHandler, localhost, authInfo);
     root.addAccessory(accessory);
   }
 
   /** Begins advertising and handling requests for this accessory. */
   public void start() {
     root.start();
+  }
+
+  public void stop() {
+    root.stop();
   }
 }

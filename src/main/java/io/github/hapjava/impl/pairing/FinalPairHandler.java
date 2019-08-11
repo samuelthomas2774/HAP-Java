@@ -1,9 +1,9 @@
 package io.github.hapjava.impl.pairing;
 
+import io.github.hapjava.HomekitAdvertiser;
 import io.github.hapjava.HomekitAuthInfo;
 import io.github.hapjava.impl.crypto.*;
 import io.github.hapjava.impl.http.HttpResponse;
-import io.github.hapjava.impl.jmdns.JmdnsHomekitAdvertiser;
 import io.github.hapjava.impl.pairing.PairSetupRequest.Stage3Request;
 import io.github.hapjava.impl.pairing.TypeLengthValueUtils.DecodeResult;
 import io.github.hapjava.impl.pairing.TypeLengthValueUtils.Encoder;
@@ -16,11 +16,11 @@ class FinalPairHandler {
 
   private final byte[] k;
   private final HomekitAuthInfo authInfo;
-  private final JmdnsHomekitAdvertiser advertiser;
+  private final HomekitAdvertiser advertiser;
 
   private byte[] hkdf_enc_key;
 
-  public FinalPairHandler(byte[] k, HomekitAuthInfo authInfo, JmdnsHomekitAdvertiser advertiser) {
+  public FinalPairHandler(byte[] k, HomekitAuthInfo authInfo, HomekitAdvertiser advertiser) {
     this.k = k;
     this.authInfo = authInfo;
     this.advertiser = advertiser;

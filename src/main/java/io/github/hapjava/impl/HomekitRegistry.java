@@ -151,6 +151,13 @@ public class HomekitRegistry {
 
   public void remove(HomekitAccessory accessory) {
     accessories.remove(getAid(accessory));
+    nextIids.remove(accessory);
+    for (Service service: services.get(accessory)) {
+      serviceCharacteristics.remove(service);
+    }
+    services.remove(accessory);
+    serviceIds.remove(accessory);
+    characteristicIds.remove(accessory);
   }
 
   public boolean isAllowUnauthenticatedRequests() {
