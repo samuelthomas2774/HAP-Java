@@ -181,7 +181,7 @@ public class HomekitRoot {
     }
   }
 
-  HomekitRegistry getRegistry() {
+  public HomekitRegistry getRegistry() {
     return registry;
   }
 }

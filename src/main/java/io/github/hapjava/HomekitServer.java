@@ -84,10 +84,14 @@ public class HomekitServer {
       HomekitAuthInfo authInfo, HomekitAccessory accessory) throws IOException {
     return new HomekitStandaloneAccessoryServer(accessory, http, localAddress, authInfo);
   }
- public HomekitStandaloneAccessoryServer createStandaloneAccessory(
-     HomekitAuthInfo authInfo, HomekitAccessory accessory, int category) throws IOException {
-   return new HomekitStandaloneAccessoryServer(accessory, category, http, localAddress, authInfo);
- }
+  public HomekitStandaloneAccessoryServer createStandaloneAccessory(
+      HomekitAuthInfo authInfo, HomekitAccessory accessory, int category) throws IOException {
+    return new HomekitStandaloneAccessoryServer(accessory, category, http, localAddress, authInfo);
+  }
+  public HomekitStandaloneAccessoryServer createStandaloneAccessory(
+      HomekitAuthInfo authInfo, HomekitAccessory accessory, HomekitAdvertiser advertiser) throws IOException {
+    return new HomekitStandaloneAccessoryServer(accessory, http, authInfo, advertiser);
+  }
 
   /**
    * Creates a bridge accessory, capable of holding multiple child accessories. This has the

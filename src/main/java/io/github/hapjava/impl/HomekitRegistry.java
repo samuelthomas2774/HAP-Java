@@ -5,8 +5,9 @@ import io.github.hapjava.Service;
 import io.github.hapjava.characteristics.Characteristic;
 import io.github.hapjava.impl.services.AccessoryInformationService;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,12 +24,9 @@ public class HomekitRegistry {
   private final Map<Service, List<Characteristic>> serviceCharacteristics = new HashMap<>();
   private final Map<HomekitAccessory, Map<Integer, Service>> serviceIds = new HashMap<>();
   private final Map<HomekitAccessory, Map<Integer, Characteristic>> characteristicIds = new HashMap<>();
-
-
-  // Allow unauthenticated requests
-  private boolean isAllowUnauthenticatedRequests = true;
-
-
+  private boolean isAllowUnauthenticatedRequests = false;
+  private HomekitRegistryState state;
+  private Consumer<HomekitRegistryState> callback;
 
   public HomekitRegistry(String label) {
     this.label = label;
@@ -50,6 +48,8 @@ public class HomekitRegistry {
     for (HomekitAccessory accessory : accessories.values()) {
       assignIids(accessory, registryState);
     }
+
+    recalculateState(registryState);
   }
 
   public HomekitRegistryState saveIds() {
@@ -272,5 +272,30 @@ public class HomekitRegistry {
   public Characteristic getCharacteristic(HomekitAccessory accessory, int iid) {
     Map<Integer, Characteristic> iids = characteristicIds.get(accessory);
     return iids.get(iid);
+  }
+
+  public void recalculateState(HomekitRegistryState oldRegistryState) {
+    recalculateState(oldRegistryState, true);
+  }
+
+  private void recalculateState(HomekitRegistryState oldRegistryState, boolean notifyChange) {
+    HomekitRegistryState currentState = this.state;
+    this.state = saveIds(oldRegistryState);
+    if (notifyChange && currentState != null && currentState.hash != this.state.hash) {
+      Consumer<HomekitRegistryState> consumer = this.callback;
+      if (consumer != null) consumer.accept(this.state);
+    }
+  }
+
+  public void onChange(Consumer<HomekitRegistryState> callback2) {
+    onChange(callback2, false, null);
+  }
+
+  public void onChange(Consumer<HomekitRegistryState> _callback, boolean initial, HomekitRegistryState oldRegistryState) {
+    this.callback = _callback;
+    if (initial) {
+      if (this.state == null) recalculateState(oldRegistryState, false);
+      this.callback.accept(this.state);
+    }
   }
 }

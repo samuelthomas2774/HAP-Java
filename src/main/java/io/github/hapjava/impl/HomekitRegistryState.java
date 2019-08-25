@@ -1,6 +1,13 @@
 package io.github.hapjava.impl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.Map.Entry;
@@ -13,6 +20,9 @@ public class HomekitRegistryState implements Serializable {
 
   // Maps aids to a ConcurrentMap mapping iids to Services and Characteristics
   final ConcurrentMap<Integer, ConcurrentMap<Integer, String>> aidMap;
+
+  final String hash;
+  final Integer version;
 
   public HomekitRegistryState(HomekitRegistry registry) {
     this(registry, null);
@@ -65,5 +75,47 @@ public class HomekitRegistryState implements Serializable {
     }
 
     this.aidMap = aidMap;
+
+    try {
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      ObjectOutputStream oos = new ObjectOutputStream(baos);
+      oos.writeObject(this);
+      oos.close();
+
+      hash = hash(Base64.getEncoder().encodeToString(baos.toByteArray()));
+      // int i = 1;
+      //
+      // if (homekitRegistryState != null) {
+      //   Integer num = homekitRegistryState.version;
+      //   if (num == null) continue;
+      //   String str2 = homekitRegistryState.hash;
+      //   if (str2 != null) i = str2 == this.hash ? num.intValue() : 1 + num.intValue();
+      // }
+
+      if (oldRegistryState == null || oldRegistryState.hash == null || oldRegistryState.version == null) {
+        version = 1;
+      } else {
+        version = oldRegistryState.hash == hash ? oldRegistryState.version : oldRegistryState.version + 1;
+      }
+
+      // this.version = Integer.valueOf(i);
+    } catch (IOException err) {
+      throw new RuntimeException("Error getting registry state version", err);
+    } catch (NoSuchAlgorithmException err) {
+      throw new RuntimeException("Error getting registry state version", err);
+    }
+  }
+
+  private static String hash(String originalString) throws NoSuchAlgorithmException {
+      byte[] hash2 = MessageDigest.getInstance("SHA-256").digest(originalString.getBytes(StandardCharsets.UTF_8));
+      StringBuffer hexString = new StringBuffer();
+      for (byte b: hash2) {
+          String hex = Integer.toHexString(b & 255);
+          if (hex.length() == 1) {
+              hexString.append('0');
+          }
+          hexString.append(hex);
+      }
+      return hexString.toString();
   }
 }
