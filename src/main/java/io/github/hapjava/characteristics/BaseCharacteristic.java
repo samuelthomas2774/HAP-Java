@@ -72,11 +72,17 @@ public abstract class BaseCharacteristic<T> implements Characteristic {
    * @return a future that will complete with the JSON builder for the object.
    */
   protected CompletableFuture<JsonObjectBuilder> makeBuilder(int instanceId) {
-    CompletableFuture<T> futureValue = getValue();
+    CompletableFuture<T> futureValue;
 
-    if (futureValue == null) {
-      logger.error("Could not retrieve value " + this.getClass().getName());
-      return null;
+    if (isReadable) {
+      futureValue = getValue();
+
+      if (futureValue == null) {
+        logger.error("Could not retrieve value " + this.getClass().getName());
+        return null;
+      }
+    } else {
+      futureValue = CompletableFuture.completedFuture(null);
     }
 
     return futureValue
@@ -105,7 +111,9 @@ public abstract class BaseCharacteristic<T> implements Characteristic {
                       .add("format", format)
                       .add("ev", false)
                       .add("description", description);
-              setJsonValue(builder, value);
+              if (isReadable) {
+                setJsonValue(builder, value);
+              }
               return builder;
             });
   }
