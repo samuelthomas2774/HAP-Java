@@ -27,11 +27,11 @@ public class HomekitUtils {
   public static String generateMac() {
     int byte1 =
         ((getSecureRandom().nextInt(255) + 1) | 2) & 0xFE; // Unicast locally administered MAC;
-    return Integer.toHexString(byte1)
+    return (byte1 > 16 ? "" : "0") + Integer.toHexString(byte1)
         + ":"
         + Stream.generate(() -> getSecureRandom().nextInt(255) + 1)
             .limit(5)
-            .map(i -> Integer.toHexString(i))
+            .map(i -> (i > 16 ? "" : "0") + Integer.toHexString(i))
             .collect(Collectors.joining(":"));
   }
 
