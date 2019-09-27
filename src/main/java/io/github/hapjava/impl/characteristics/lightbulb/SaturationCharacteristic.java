@@ -4,14 +4,24 @@ import io.github.hapjava.HomekitCharacteristicChangeCallback;
 import io.github.hapjava.accessories.ColorfulLightbulb;
 import io.github.hapjava.characteristics.EventableCharacteristic;
 import io.github.hapjava.characteristics.FloatCharacteristic;
+import io.github.hapjava.impl.ExceptionalConsumer;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class SaturationCharacteristic extends FloatCharacteristic
     implements EventableCharacteristic {
 
-  private final ColorfulLightbulb lightbulb;
+  private final Supplier<CompletableFuture<Double>> getter;
+  private final ExceptionalConsumer<Double> setter;
+  private final Consumer<HomekitCharacteristicChangeCallback> subscriber;
+  private final Runnable unsubscriber;
 
-  public SaturationCharacteristic(ColorfulLightbulb lightbulb) {
+  public SaturationCharacteristic(
+      Supplier<CompletableFuture<Double>> getter,
+      ExceptionalConsumer<Double> setter,
+      Consumer<HomekitCharacteristicChangeCallback> subscriber,
+      Runnable unsubscriber) {
     super(
         "0000002F-0000-1000-8000-0026BB765291",
         true,
@@ -20,27 +30,39 @@ public class SaturationCharacteristic extends FloatCharacteristic
         0,
         100,
         1,
-        "%");
-    this.lightbulb = lightbulb;
+        "percentage");
+    this.getter = getter;
+    this.setter = setter;
+    this.subscriber = subscriber;
+    this.unsubscriber = unsubscriber;
   }
 
-  @Override
-  public void subscribe(HomekitCharacteristicChangeCallback callback) {
-    lightbulb.subscribeSaturation(callback);
-  }
-
-  @Override
-  public void unsubscribe() {
-    lightbulb.unsubscribeSaturation();
-  }
-
-  @Override
-  protected void setValue(Double value) throws Exception {
-    lightbulb.setSaturation(value);
+  public SaturationCharacteristic(ColorfulLightbulb lightbulb) {
+    this(
+      () -> lightbulb.getSaturation(),
+      v -> lightbulb.setSaturation(v),
+      c -> lightbulb.subscribeSaturation(c),
+      () -> lightbulb.unsubscribeSaturation()
+    );
   }
 
   @Override
   protected CompletableFuture<Double> getDoubleValue() {
-    return lightbulb.getSaturation();
+    return getter.get();
+  }
+
+  @Override
+  protected void setValue(Double value) throws Exception {
+    setter.accept(value);
+  }
+
+  @Override
+  public void subscribe(HomekitCharacteristicChangeCallback callback) {
+    subscriber.accept(callback);
+  }
+
+  @Override
+  public void unsubscribe() {
+    unsubscriber.run();
   }
 }

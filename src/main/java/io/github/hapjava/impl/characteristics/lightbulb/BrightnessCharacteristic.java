@@ -4,14 +4,24 @@ import io.github.hapjava.HomekitCharacteristicChangeCallback;
 import io.github.hapjava.accessories.DimmableLightbulb;
 import io.github.hapjava.characteristics.EventableCharacteristic;
 import io.github.hapjava.characteristics.IntegerCharacteristic;
+import io.github.hapjava.impl.ExceptionalConsumer;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class BrightnessCharacteristic extends IntegerCharacteristic
     implements EventableCharacteristic {
 
-  private final DimmableLightbulb lightbulb;
+  private final Supplier<CompletableFuture<Integer>> getter;
+  private final ExceptionalConsumer<Integer> setter;
+  private final Consumer<HomekitCharacteristicChangeCallback> subscriber;
+  private final Runnable unsubscriber;
 
-  public BrightnessCharacteristic(DimmableLightbulb lightbulb) {
+  public BrightnessCharacteristic(
+      Supplier<CompletableFuture<Integer>> getter,
+      ExceptionalConsumer<Integer> setter,
+      Consumer<HomekitCharacteristicChangeCallback> subscriber,
+      Runnable unsubscriber) {
     super(
         "00000008-0000-1000-8000-0026BB765291",
         true,
@@ -19,27 +29,39 @@ public class BrightnessCharacteristic extends IntegerCharacteristic
         "Adjust brightness of the light",
         0,
         100,
-        "%");
-    this.lightbulb = lightbulb;
+        "percentage");
+    this.getter = getter;
+    this.setter = setter;
+    this.subscriber = subscriber;
+    this.unsubscriber = unsubscriber;
   }
 
-  @Override
-  public void subscribe(HomekitCharacteristicChangeCallback callback) {
-    lightbulb.subscribeBrightness(callback);
-  }
-
-  @Override
-  public void unsubscribe() {
-    lightbulb.unsubscribeBrightness();
-  }
-
-  @Override
-  protected void setValue(Integer value) throws Exception {
-    lightbulb.setBrightness(value);
+  public BrightnessCharacteristic(DimmableLightbulb lightbulb) {
+    this(
+      () -> lightbulb.getBrightness(),
+      v -> lightbulb.setBrightness(v),
+      c -> lightbulb.subscribeBrightness(c),
+      () -> lightbulb.unsubscribeBrightness()
+    );
   }
 
   @Override
   protected CompletableFuture<Integer> getValue() {
-    return lightbulb.getBrightness();
+    return getter.get();
+  }
+
+  @Override
+  protected void setValue(Integer value) throws Exception {
+    setter.accept(value);
+  }
+
+  @Override
+  public void subscribe(HomekitCharacteristicChangeCallback callback) {
+    subscriber.accept(callback);
+  }
+
+  @Override
+  public void unsubscribe() {
+    unsubscriber.run();
   }
 }
