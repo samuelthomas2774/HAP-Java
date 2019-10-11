@@ -7,7 +7,6 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.Map.Entry;
@@ -82,7 +81,7 @@ public class HomekitRegistryState implements Serializable {
       oos.writeObject(this);
       oos.close();
 
-      hash = hash(Base64.getEncoder().encodeToString(baos.toByteArray()));
+      hash = hash(baos.toByteArray());
       // int i = 1;
       //
       // if (homekitRegistryState != null) {
@@ -107,7 +106,15 @@ public class HomekitRegistryState implements Serializable {
   }
 
   private static String hash(String originalString) throws NoSuchAlgorithmException {
-      byte[] hash2 = MessageDigest.getInstance("SHA-256").digest(originalString.getBytes(StandardCharsets.UTF_8));
+    return hash(originalString.getBytes(StandardCharsets.UTF_8));
+  }
+
+  private static String hash(byte[] bytes) throws NoSuchAlgorithmException {
+    byte[] hash2 = MessageDigest.getInstance("SHA-256").digest(bytes);
+    return hex(hash2);
+  }
+
+  private static String hex(byte[] hash2) {
       StringBuffer hexString = new StringBuffer();
       for (byte b: hash2) {
           String hex = Integer.toHexString(b & 255);
